@@ -6,11 +6,17 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import Logo from './Logo';
+import { supabaseBrowser } from '@/lib/supabase/client';
 
 const Navbar: React.FC = () => {
   const { language, setLanguage, t, dir } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+  const [addressLine, setAddressLine] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const pathname = usePathname();
 
   const NAV_ITEMS = [
@@ -44,6 +50,42 @@ const Navbar: React.FC = () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const supabase = supabaseBrowser();
+        const { data } = await supabase
+          .from("app_settings")
+          .select("address_line,city,country,contact_email")
+          .eq("key", "default")
+          .maybeSingle();
+
+        if (data?.address_line) setAddressLine(data.address_line);
+        if (data?.city) setCity(data.city);
+        if (data?.country) setCountry(data.country);
+        if (data?.contact_email) setContactEmail(data.contact_email);
+      } catch {
+        // keep empty fallback values
+      } finally {
+        setLoadingInfo(false);
+      }
+    };
+
+    void loadSettings();
+  }, []);
+
+  const displayAddress = React.useMemo(() => {
+    const fallbackAddress = [city?.trim(), country?.trim()].filter(Boolean).join(", ");
+    const text = addressLine?.trim() || fallbackAddress;
+    if (!text || !text.startsWith("{")) return text;
+    try {
+      const parsed = JSON.parse(text) as { en?: string; fr?: string; ar?: string };
+      return (language === "fr" ? parsed.fr : language === "ar" ? parsed.ar : parsed.en) || parsed.en || text;
+    } catch {
+      return text;
+    }
+  }, [addressLine, city, country, language]);
 
   // Calculate slide direction based on language direction
   // LTR: Slide in from Right (translate-x-full -> 0)
@@ -173,8 +215,23 @@ const Navbar: React.FC = () => {
 
             {/* Contact Quick Link */}
             <div className="text-neutral-500 text-sm font-light">
-              <p>New York, USA</p>
-              <a href="mailto:hello@makani.com" className="text-black border-b border-neutral-200 pb-0.5 mt-2 inline-block">hello@makani.com</a>
+              {loadingInfo ? (
+                <div className="space-y-2">
+                  <div className="h-4 w-36 animate-pulse bg-neutral-200" />
+                  <div className="h-4 w-44 animate-pulse bg-neutral-200" />
+                </div>
+              ) : (
+                <>
+                  <p>{displayAddress || '-'}</p>
+                  {contactEmail ? (
+                    <a href={`mailto:${contactEmail}`} className="text-black border-b border-neutral-200 pb-0.5 mt-2 inline-block">
+                      {contactEmail}
+                    </a>
+                  ) : (
+                    <p className="text-neutral-400 mt-2">-</p>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

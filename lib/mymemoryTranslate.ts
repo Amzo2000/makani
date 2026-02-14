@@ -53,11 +53,7 @@ export const translateToAll = async (
 
   const targets = (["en", "fr", "ar"] as UiLanguage[]).filter((lang) => lang !== source);
   for (const target of targets) {
-    try {
-      result[target] = await translateText(value, source, target);
-    } catch {
-      result[target] = value;
-    }
+    result[target] = await translateText(value, source, target);
   }
 
   return result;

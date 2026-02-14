@@ -106,7 +106,6 @@ export default function AdminProjectEdit({
   const router = useRouter();
   const supabase = useMemo(() => supabaseBrowser(), []);
   const editMediaRef = useRef(editMedia);
-  const initialDraftRef = useRef<ProjectDraft>(toDraft(initialProject, sourceLanguage));
   const bucket = "projects";
   const progressLabel = {
     preparing: language === "fr" ? "Preparation de la modification..." : language === "ar" ? "جار تحضير التعديل..." : "Preparing update...",
@@ -169,21 +168,11 @@ export default function AdminProjectEdit({
     };
 
     const next = { ...draft };
-    const changedFields = fields.filter((field) => {
-      const currentValue = (next[`${field}_en` as keyof ProjectDraft] as string).trim();
-      const initialValue = (initialDraftRef.current[`${field}_en` as keyof ProjectDraft] as string).trim();
-      return currentValue !== initialValue;
-    });
-
-    if (changedFields.length === 0) {
-      return next;
-    }
-
-    for (let index = 0; index < changedFields.length; index += 1) {
-      const field = changedFields[index];
+    for (let index = 0; index < fields.length; index += 1) {
+      const field = fields[index];
       const base = (next[`${field}_en` as keyof ProjectDraft] as string) ?? "";
       setProgress({
-        percent: 12 + Math.round(((index + 1) / changedFields.length) * 32),
+        percent: 12 + Math.round(((index + 1) / fields.length) * 32),
         label: progressLabel.translating(fieldLabels[field]),
       });
       const translated = await translateToAll(base, source);
