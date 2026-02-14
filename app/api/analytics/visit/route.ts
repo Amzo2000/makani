@@ -11,11 +11,20 @@ const newToken = () => {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 };
 
+const TOKEN_PATTERN = /^[a-zA-Z0-9-]{8,120}$/;
+
 const sanitizeText = (value: unknown, maxLen = 300) => {
   if (typeof value !== "string") return null;
   const normalized = value.trim();
   if (!normalized) return null;
   return normalized.slice(0, maxLen);
+};
+
+const sanitizeToken = (value: unknown) => {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim();
+  if (!TOKEN_PATTERN.test(normalized)) return null;
+  return normalized;
 };
 
 const getDeviceType = (userAgent: string | null) => {
@@ -51,7 +60,6 @@ export async function POST(request: NextRequest) {
   }
 
   const existingToken = request.cookies.get(COOKIE_NAME)?.value;
-  const visitorToken = existingToken || newToken();
 
   let payload: Record<string, unknown> = {};
   try {
@@ -60,6 +68,8 @@ export async function POST(request: NextRequest) {
     payload = {};
   }
 
+  const clientToken = sanitizeToken(payload.visitorToken);
+  const visitorToken = existingToken || clientToken || newToken();
   const path = sanitizeText(payload.path, 500) || request.nextUrl.searchParams.get("path") || "/";
   const referrer = sanitizeText(payload.referrer, 1000);
   const language = sanitizeText(payload.language, 32);
@@ -135,28 +145,6 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       return softFail(insertError.message);
     }
-  }
-
-  const { error: eventError } = await admin.from("site_visit_events").insert({
-    visitor_token: visitorToken,
-    visited_at: now,
-    path,
-    referrer,
-    user_agent: userAgent,
-    ip_hash: ipHash,
-    language,
-    timezone,
-    screen,
-    device_type: deviceType,
-    utm_source: utmSource,
-    utm_medium: utmMedium,
-    utm_campaign: utmCampaign,
-    utm_term: utmTerm,
-    utm_content: utmContent,
-  });
-
-  if (eventError) {
-    return softFail(eventError.message);
   }
 
   const response = NextResponse.json({ tracked: true });

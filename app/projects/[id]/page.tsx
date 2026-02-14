@@ -8,6 +8,24 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import type { Project } from '@/types';
 
+const VISITOR_TOKEN_KEY = "makani_visitor_token_v1";
+const PROJECT_VIEW_SENT_PREFIX = "makani_project_view_sent_";
+
+const ensureVisitorToken = () => {
+  try {
+    const existing = window.localStorage.getItem(VISITOR_TOKEN_KEY);
+    if (existing) return existing;
+    const token =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    window.localStorage.setItem(VISITOR_TOKEN_KEY, token);
+    return token;
+  } catch {
+    return null;
+  }
+};
+
 const statusLabelFromKey = (value: string, language: 'en' | 'fr' | 'ar'): string => {
   const key = value?.trim().toLowerCase();
   if (key === 'design') return language === 'fr' ? 'Conception' : language === 'ar' ? 'تصميم فقط' : 'Design only';
@@ -89,6 +107,31 @@ const ProjectDetail: React.FC = () => {
     return () => {
       alive = false;
     };
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    const sentKey = `${PROJECT_VIEW_SENT_PREFIX}${id}`;
+    try {
+      if (window.sessionStorage.getItem(sentKey) === "1") return;
+      window.sessionStorage.setItem(sentKey, "1");
+    } catch {
+      // ignore storage access issues
+    }
+
+    const visitorToken = ensureVisitorToken();
+    void fetch("/api/analytics/project-view", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        projectId: id,
+        visitorToken,
+      }),
+    }).catch(() => {
+      // ignore analytics errors
+    });
   }, [id]);
 
   const updateSearchParams = React.useCallback((next: URLSearchParams, mode: 'push' | 'replace' = 'push') => {
