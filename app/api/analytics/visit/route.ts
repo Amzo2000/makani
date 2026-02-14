@@ -68,8 +68,6 @@ export async function POST(request: NextRequest) {
     payload = {};
   }
 
-  const clientToken = sanitizeToken(payload.visitorToken);
-  const visitorToken = existingToken || clientToken || newToken();
   const path = sanitizeText(payload.path, 500) || request.nextUrl.searchParams.get("path") || "/";
   const referrer = sanitizeText(payload.referrer, 1000);
   const language = sanitizeText(payload.language, 32);
@@ -85,6 +83,24 @@ export async function POST(request: NextRequest) {
   const deviceType = getDeviceType(userAgent);
   const ipHash = hashIp(getIp(request));
   const now = new Date().toISOString();
+
+  const clientToken = sanitizeToken(payload.visitorToken);
+  let recentToken: string | null = null;
+  if (!existingToken && !clientToken && ipHash && userAgent) {
+    const recentWindowIso = new Date(Date.now() - 15000).toISOString();
+    const { data: recent } = await admin
+      .from("site_visits")
+      .select("visitor_token")
+      .eq("ip_hash", ipHash)
+      .eq("user_agent", userAgent)
+      .gte("last_seen_at", recentWindowIso)
+      .order("last_seen_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    recentToken = recent?.visitor_token ?? null;
+  }
+
+  const visitorToken = existingToken || clientToken || recentToken || newToken();
 
   const { data: existing, error: fetchError } = await admin
     .from("site_visits")
