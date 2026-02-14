@@ -48,7 +48,7 @@ export default async function AdminPage() {
       adminClient
         .from("site_visits")
         .select("id", { count: "exact", head: true })
-        .gte("first_seen_at", monthStart.toISOString()),
+        .gte("last_seen_at", monthStart.toISOString()),
     ]);
 
     visitorCount = allVisitors ?? 0;

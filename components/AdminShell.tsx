@@ -12,6 +12,7 @@ import {
   MessageSquareMore,
   Shapes,
   ShieldCheck,
+  Users,
   X,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/admin/projects", key: "projects", icon: FolderKanban },
   { href: "/admin/categories", key: "categories", icon: Shapes },
   { href: "/admin/inquiries", key: "inquiries", icon: MessageSquareMore },
+  { href: "/admin/visitors", key: "visitors", icon: Users, label: "Visitors" },
   { href: "/admin/settings", key: "settings", icon: Cog },
 ];
 
@@ -75,7 +77,7 @@ export default function AdminShell({
                       }`}
                     >
                       <Icon size={14} />
-                      <span>{t("admin", item.key)}</span>
+                      <span>{item.label ?? t("admin", item.key)}</span>
                     </Link>
                   );
                 })}
@@ -122,7 +124,7 @@ export default function AdminShell({
                   >
                     <span className="inline-flex items-center gap-3">
                       <Icon size={16} className={isActive ? "text-black" : "text-neutral-500"} />
-                      <span className="text-sm uppercase tracking-widest">{t("admin", item.key)}</span>
+                      <span className="text-sm uppercase tracking-widest">{item.label ?? t("admin", item.key)}</span>
                     </span>
                     <ChevronRight size={16} className="text-neutral-400 group-hover:text-black" />
                   </Link>

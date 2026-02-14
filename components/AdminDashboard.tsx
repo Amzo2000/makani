@@ -86,9 +86,10 @@ export default function AdminDashboard({
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <QuickLink href="/admin/projects" title={t("admin", "projects")} description={t("admin", "projectsSubtitle")} />
         <QuickLink href="/admin/inquiries" title={t("admin", "inquiries")} description={t("admin", "inquiriesSubtitle")} />
+        <QuickLink href="/admin/visitors" title="Visitors" description="Track recent traffic, top pages, and visitor activity." />
       </section>
     </div>
   );
