@@ -22,7 +22,7 @@ const navItems = [
   { href: "/admin/projects", key: "projects", icon: FolderKanban },
   { href: "/admin/categories", key: "categories", icon: Shapes },
   { href: "/admin/inquiries", key: "inquiries", icon: MessageSquareMore },
-  { href: "/admin/visitors", key: "visitors", icon: Users, label: "Visitors" },
+  { href: "/admin/visitors", key: "visitors", icon: Users },
   { href: "/admin/settings", key: "settings", icon: Cog },
 ];
 
@@ -56,13 +56,13 @@ export default function AdminShell({
         }`}
       >
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-4 min-[900px]:gap-6">
             <div className="flex items-center gap-2 text-sm uppercase tracking-[0.3em]">
               <ShieldCheck size={14} className="text-neutral-500" />
               <span>Makani Admin</span>
             </div>
             {showNavigation && (
-              <nav className="hidden md:flex items-center gap-6 text-xs uppercase tracking-widest">
+              <nav className="hidden min-[900px]:flex items-center gap-6 text-xs uppercase tracking-widest">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
@@ -77,7 +77,7 @@ export default function AdminShell({
                       }`}
                     >
                       <Icon size={14} />
-                      <span>{item.label ?? t("admin", item.key)}</span>
+                      <span>{t("admin", item.key)}</span>
                     </Link>
                   );
                 })}
@@ -89,7 +89,7 @@ export default function AdminShell({
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
-                className="md:hidden inline-flex items-center gap-2 border border-neutral-300 px-3 py-2 text-[10px] uppercase tracking-widest"
+                className="min-[900px]:hidden inline-flex items-center gap-2 border border-neutral-300 px-3 py-2 text-[10px] uppercase tracking-widest"
                 aria-expanded={mobileMenuOpen}
                 aria-controls="admin-mobile-menu"
                 aria-label="Toggle admin menu"
@@ -104,7 +104,7 @@ export default function AdminShell({
       {showNavigation && (
         <div
           id="admin-mobile-menu"
-          className={`fixed inset-0 z-[100] bg-white pt-24 pb-10 px-6 transition-all duration-300 ease-out md:hidden ${
+          className={`fixed inset-0 z-[100] bg-white pt-24 pb-10 px-6 transition-all duration-300 ease-out min-[900px]:hidden ${
             mobileMenuOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
           }`}
         >
@@ -124,7 +124,7 @@ export default function AdminShell({
                   >
                     <span className="inline-flex items-center gap-3">
                       <Icon size={16} className={isActive ? "text-black" : "text-neutral-500"} />
-                      <span className="text-sm uppercase tracking-widest">{item.label ?? t("admin", item.key)}</span>
+                      <span className="text-sm uppercase tracking-widest">{t("admin", item.key)}</span>
                     </span>
                     <ChevronRight size={16} className="text-neutral-400 group-hover:text-black" />
                   </Link>

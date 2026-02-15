@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { useLanguage } from '../context/LanguageContext';
+import React from "react";
+import { useLanguage } from "../context/LanguageContext";
 
 const LanguagePrompt: React.FC = () => {
   const { setLanguage, hasLanguagePreference } = useLanguage();
@@ -19,21 +19,21 @@ const LanguagePrompt: React.FC = () => {
         <div className="mt-6 grid gap-3">
           <button
             type="button"
-            onClick={() => setLanguage('en')}
+            onClick={() => setLanguage("en")}
             className="w-full rounded-full border border-neutral-900 px-4 py-3 text-sm uppercase tracking-[0.2em] text-neutral-900 transition hover:bg-neutral-900 hover:text-white"
           >
             English
           </button>
           <button
             type="button"
-            onClick={() => setLanguage('fr')}
+            onClick={() => setLanguage("fr")}
             className="w-full rounded-full border border-neutral-200 px-4 py-3 text-sm uppercase tracking-[0.2em] text-neutral-700 transition hover:border-neutral-900 hover:text-neutral-900"
           >
             Français
           </button>
           <button
             type="button"
-            onClick={() => setLanguage('ar')}
+            onClick={() => setLanguage("ar")}
             className="w-full rounded-full border border-neutral-200 px-4 py-3 text-sm uppercase tracking-[0.2em] text-neutral-700 transition hover:border-neutral-900 hover:text-neutral-900"
           >
             العربية
